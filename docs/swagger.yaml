@@ -1,0 +1,47 @@
+basePath: '{{.BasePath}}'
+host: '{{.Host}}'
+definitions:
+  model.Employee:
+    type: object
+    properties:
+      idEmployee:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+      phone:
+        type: string
+      hireDate:
+        type: string
+      salary:
+        type: number
+
+  model.GenericResponse:
+    type: object
+    properties:
+      code:
+        type: number
+      status:
+        type: string
+      data:
+        type: object
+info:
+  contact: { }
+  description: Employee API
+  version: '1.0'
+  title: Swagger Employee API
+  license: { }
+paths:
+  /api/v1/employees:
+    get:
+      operationId: getEmployees
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GenericResponse'
+            type: object
+swagger: "2.0"

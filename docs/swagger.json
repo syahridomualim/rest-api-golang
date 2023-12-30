@@ -1,0 +1,191 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "Employee API",
+    "title": "Swagger Employee API",
+    "contact": {},
+    "license": {},
+    "version": "1.0"
+  },
+  "host": "{{.Host}}",
+  "basePath": "{{.BasePath}}",
+  "paths": {
+    "/api/v1/employees": {
+      "get": {
+        "operationId": "getEmployees",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "employee"
+        ],
+        "description": "Get all employees' data",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.GenericResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "insertEmployee",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "employee"
+        ],
+        "parameters": [
+          {
+            "description": "employee request",
+            "name": "employeeRq",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.Employee"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.GenericResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateEmployee",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "employee"
+        ],
+        "parameters": [
+          {
+            "description": "employee request",
+            "name": "employeeRq",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/model.Employee"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.GenericResponse"
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/employees/{employee_id}": {
+      "get": {
+        "operationId": "getEmployeeId",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "employee id",
+            "name": "employee_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "tags": [
+          "employee"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/model.GenericResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "employee"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "type": "string",
+            "description": "employee id",
+            "name": "employee_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "301": {
+            "description": "DELETED",
+            "schema": {
+              "$ref": "#/definitions/model.GenericResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "model.Employee": {
+      "type": "object",
+      "properties": {
+        "idEmployee": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "hireDate": {
+          "type": "string"
+        },
+        "salary": {
+          "type": "number"
+        }
+      }
+    },
+    "model.GenericResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}
