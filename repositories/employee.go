@@ -3,11 +3,11 @@ package repositories
 import (
 	"context"
 	"database/sql"
+	"employee-golang/config"
 	"employee-golang/model"
 	"errors"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 	"sync"
 	"time"
 )
@@ -28,7 +28,7 @@ func InitConfiguration() *repositories {
 	// connect db
 	MutexConfigurationConn.Lock()
 	if EmployeeDB == nil {
-		configurationDB, err := sql.Open("mysql", getConnection())
+		configurationDB, err := sql.Open("mysql", config.GetConnection())
 		if err != nil {
 			logrus.Errorf("failed to create configuration connection %s", err)
 		}
@@ -57,7 +57,7 @@ type IEmployeeRepositories interface {
 
 func (r repositories) GetEmployee() (rs []*model.Employee, err error) {
 	res := make([]*model.Employee, 0)
-	query := getEmployees()
+	query := config.GetEmployees()
 	rows, err := r.DB.Query(query)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (r repositories) GetEmployee() (rs []*model.Employee, err error) {
 }
 
 func (r repositories) GetEmployeeById(id string) (rs *model.Employee, err error) {
-	query := getEmployeeById()
+	query := config.GetEmployeeById()
 	data := &model.Employee{}
 
 	err = r.DB.QueryRowContext(context.Background(), query, id).Scan(
@@ -112,7 +112,7 @@ func (r repositories) GetEmployeeById(id string) (rs *model.Employee, err error)
 }
 
 func (r repositories) InsertEmployee(employee *model.Employee) (rs string, err error) {
-	queryInsert := insertEmployee()
+	queryInsert := config.InsertEmployee()
 	ctx := context.Background()
 	// check if the employee with same ID or email already exists
 	exists, err := r.employeeExists(ctx, &employee.IdEmployee, &employee.Email)
@@ -151,7 +151,7 @@ func (r repositories) UpdateEmployee(employee *model.Employee) (rs string, err e
 	if !exists {
 		return "Employee doesn't exists", errors.New("employee doesn't exists")
 	}
-	query := editEmployee()
+	query := config.EditEmployee()
 	_, err = r.DB.ExecContext(ctx, query,
 		employee.FirstName, employee.LastName, employee.Email,
 		employee.Phone, &employee.HireDate, &employee.Salary, employee.IdEmployee)
@@ -175,79 +175,24 @@ func (r repositories) DeleteEmployee(employeeId string) (rs string, err error) {
 	if !exists {
 		return "Employee doesn't exists", errors.New("employee doesn't exists")
 	}
-	query := deleteEmployee()
+	query := config.DeleteEmployee()
 	_, err = r.DB.ExecContext(ctx, query, employeeId)
 	switch {
 	case err != nil:
 		logrus.Errorf("Error on database %v", err)
 		return "", err
 	default:
-		logrus.Infof("Employee was edited")
+		logrus.Infof("Employee was deleted")
 	}
-	return "", err
+	return "Employee was deleted", err
 }
 
 func (r repositories) employeeExists(ctx context.Context, idEmployee, email *string) (bool, error) {
 	var count int
-	query := countEmployee()
+	query := config.CountEmployee()
 	err := r.DB.QueryRowContext(ctx, query, idEmployee, email).Scan(&count)
 	if err != nil {
 		return false, err
 	}
 	return count > 0, nil
-}
-func getConnection() string {
-	v := viper.GetString("datasource.employee.connection")
-	if v == "" {
-		return ""
-	}
-	return v
-}
-
-func getEmployees() string {
-	v := viper.GetString("app.query.GET_EMPLOYEES")
-	if v == "" {
-		return "select employee_id, first_name, last_name, email, phone, coalesce(hire_date, ''), coalesce(salary, 0.0) from employee"
-	}
-	return v
-}
-
-func getEmployeeById() string {
-	v := viper.GetString("app.query.GET_EMPLOYEES_BY_ID")
-	if v == "" {
-		return "select employee_id, first_name, last_name, email, phone, coalesce(hire_date, ''), coalesce(salary, 0.0) from employee where employee_id = ?"
-	}
-	return v
-}
-
-func insertEmployee() string {
-	v := viper.GetString("app.query.INSERT_EMPLOYEE")
-	if v == "" {
-		return "insert into employee (employee_id, first_name, last_name, email, phone, hire_date, salary) value (?, ?, ?, ?, ?, nullif(?,''), nullif(?, ''))"
-	}
-	return v
-}
-
-func countEmployee() string {
-	v := viper.GetString("app.query.COUNT_EMPLOYEE")
-	if v == "" {
-		return "select count(*) from employee where employee_id = ? or email = nullif(?, '')"
-	}
-	return v
-}
-
-func editEmployee() string {
-	v := viper.GetString("app.query.EDIT_EMPLOYEE")
-	if v == "" {
-		return "update employee set first_name = ?, last_name = ?, email = ?, phone = ?, hire_date = nullif(?, ''), salary = nullif(?, 0) where employee_id = ?"
-	}
-	return v
-}
-
-func deleteEmployee() string {
-	v := viper.GetString("app.query.DELETE_EMPLOYEE")
-	if v != "" {
-		return "delete from employee where employee_id = ?"
-	}
-	return v
 }

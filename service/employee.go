@@ -21,6 +21,7 @@ type IEmployeeService interface {
 	GetEmployeeById(id string) (rs *model.Employee, err error)
 	InsertEmployee(employee *model.Employee) (rs string, err error)
 	UpdateEmployee(employee *model.Employee) (rs string, err error)
+	DeleteEmployee(id string) (rs string, err error)
 }
 
 func (s service) InsertEmployee(employee *model.Employee) (rs string, err error) {
@@ -55,6 +56,15 @@ func (s service) GetEmployeeById(id string) (rs *model.Employee, err error) {
 	if err != nil {
 		logrus.Error("Error is been occurred")
 		return nil, err
+	}
+	return rs, nil
+}
+
+func (s service) DeleteEmployee(id string) (rs string, err error) {
+	rs, err = s.repository.DeleteEmployee(id)
+	if err != nil {
+		logrus.Error("Error is been occurred")
+		return "", err
 	}
 	return rs, nil
 }
